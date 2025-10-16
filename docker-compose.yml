@@ -1,0 +1,41 @@
+version: '2.4'
+
+services:
+  postgres:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: vicente
+      POSTGRES_PASSWORD: vicente
+      POSTGRES_DB: tienda
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vicente"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
+      - pgdata:/var/lib/postgresql/data
+
+  servidor:
+    build: ./servidor
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: vicente
+      DB_PASSWORD: vicente
+      DB_NAME: tienda
+
+  cliente:
+    build: ./cliente
+    ports:
+      - "3000:3000"
+    depends_on:
+      - servidor
+
+volumes:
+  pgdata:

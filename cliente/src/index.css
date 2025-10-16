@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+  background-color: #f5ebe0; /* Marrón clarito suave */
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+
+  background-image: url('./assets/logoFondoTransp.png'); /* ajusta la ruta si está en /public */
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: auto 60%;
+  background-attachment: fixed;
+
+
+
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
