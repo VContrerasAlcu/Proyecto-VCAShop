@@ -1,5 +1,5 @@
 # Proyecto Tienda 
-- Descomprimir cliente.rar y servidor.rar en las carpeta cliente y servidor respectivamente.
+
 
 ## Requisitos
 - Docker y Docker Compose instalados
