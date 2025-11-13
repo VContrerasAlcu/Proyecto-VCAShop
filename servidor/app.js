@@ -5,6 +5,7 @@ import rutaLogin from './routes/login.js';
 import rutaClientes from './routes/clientes.js'; 
 import rutaCarros from './routes/carros.js'; 
 import rutaPago from "./routes/pago.js"; 
+import rutaHubspot from "./routes/hubspot.js"
 import cors from 'cors'; 
 import path from 'path'; 
 import http from 'http'; 
@@ -26,7 +27,7 @@ const server = http.createServer(app);
 // Configuración de Socket.IO con CORS
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:3000', // Permitir peticiones desde el frontend
+        origin: `${process.env.CLIENTE_URL}`, // Permitir peticiones desde el frontend
         methods: ['GET', 'POST']
     }
 });
@@ -80,9 +81,10 @@ app.use('/login', rutaLogin);
 app.use('/clientes', rutaClientes);
 app.use('/carros', rutaCarros);
 app.use("/pago", rutaPago);
+app.use("/hubspot", rutaHubspot);
 
 // Puerto en el que se ejecuta el servidor
 const PORT = 3001;
 
 // Iniciar el servidor
-server.listen(PORT, () => console.log(`servidor escuchando en http://localhost:${PORT}..`));
+server.listen(PORT, () => console.log(`servidor escuchando en el puerto ${PORT}..`));

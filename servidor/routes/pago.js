@@ -4,6 +4,9 @@ import RedsysAPI from "redsys-api"; // Librería para interactuar con Redsys
 import Compra from "../classes/Compra.js"; // Clase que representa una compra individual
 import Compras from "../classes/Compras.js"; // Clase para gestionar múltiples compras
 import Carros from "../classes/Carros.js"; // Clase para gestionar el carrito de compras
+import Clientes from "../classes/Clientes.js";
+import { registrarCompraEnHubspot } from "../servicios/hubspot.js";
+import {enviarN8N} from "../servicios/n8n.js";
 
 // Inicialización del router y Redsys
 const router = express.Router();
@@ -42,9 +45,9 @@ router.post("/generarPago", async (req, res) => {
   redsys.setParameter('DS_MERCHANT_CURRENCY', '978'); // Moneda: Euro
   redsys.setParameter('DS_MERCHANT_TRANSACTIONTYPE', '0'); // Tipo de transacción: compra
   redsys.setParameter('DS_MERCHANT_TERMINAL', terminal); // Terminal
-  redsys.setParameter('DS_MERCHANT_MERCHANTURL', "https://d885295c3486.ngrok-free.app/pago/respuesta-pago"); // URL de notificación
-  redsys.setParameter('DS_MERCHANT_URLOK', "http://localhost:3000/pagoOk"); // Redirección si el pago es exitoso
-  redsys.setParameter('DS_MERCHANT_URLKO', "http://localhost:3000/pagoError"); // Redirección si el pago falla
+  redsys.setParameter('DS_MERCHANT_MERCHANTURL', `${process.env.SERVIDOR_URL}/pago/respuesta-pago`); // URL de notificación
+  redsys.setParameter('DS_MERCHANT_URLOK', `${process.env.CLIENTE_URL}/pagoOk`); // Redirección si el pago es exitoso
+  redsys.setParameter('DS_MERCHANT_URLKO', `${process.env.CLIENTE_URL}/pagoError`); // Redirección si el pago falla
   redsys.setParameter('DS_MERCHANT_CONSUMERLANGUAGE', '002'); // Idioma: español
   redsys.setParameter('DS_MERCHANT_PRODUCTDESCRIPTION', 'Compra online'); // Descripción del producto
 
@@ -138,6 +141,13 @@ router.post("/respuesta-pago", express.urlencoded({ extended: true }), async (re
     if (result) {
       console.log(" Pago correcto. Estado de compra cambiada a confirmada");
 
+      await registrarCompraEnHubspot(compra);
+
+      const clientes = new Clientes();
+      await clientes.conectar();
+      const cliente = await clientes.buscar(compra.email);
+      await enviarN8N(cliente, compra.carro);
+      
       // Vaciar el carrito del cliente
       const carros = new Carros();
       await carros.conectar();

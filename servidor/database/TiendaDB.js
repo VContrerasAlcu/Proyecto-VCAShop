@@ -1,6 +1,8 @@
 import pkg from 'pg';
 const { Pool } = pkg;
 
+import dotenv from 'dotenv';
+dotenv.config();
 /**
  * Clase TiendaDB
  * Esta clase te ayuda a conectarte a una base de datos PostgreSQL, hacer consultas y cerrar la conexión.
@@ -12,12 +14,13 @@ class TiendaDB {
      */
     static async conectar(reintentos = 10, esperaMs = 2000) {
         const pool = new Pool({
-            user: 'vicente',
-            host: 'postgres',
-            database: 'tienda',
-            password: 'vicente',
-            port: 5432,
+            user: process.env.DB_USER,
+            host: process.env.DB_HOST,
+            database: process.env.DB_NAME,
+            password: process.env.DB_PASSWORD,
+            port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
         });
+
 
         for (let i = 0; i < reintentos; i++) {
             try {

@@ -4,7 +4,11 @@ import { generarToken, verificarToken } from '../controllers/auth.js';
 import nodemailer from 'nodemailer';
 import Cliente from '../classes/Cliente.js';
 import Clientes from '../classes/Clientes.js';
+import { OAuth2Client } from 'google-auth-library';
+import { registrarContactoEnHubspot } from "../servicios/hubspot.js";
 
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const router = express.Router();
 const codigosVerificacion = {}; // Almacena códigos temporales para verificación y recuperación
 
@@ -53,7 +57,7 @@ router.post("/login", async (req, res) => {
 
     const token = generarToken(cliente);
     cliente.autorizar(token);
-    res.json({ cliente });
+    res.status(200).json({ cliente });
 });
 
 /**
@@ -62,27 +66,38 @@ router.post("/login", async (req, res) => {
  * Si el cliente no existe, lo crea automáticamente.
  */
 router.post("/login-google", async (req, res) => {
-    const { googleData } = req.body;
+    const { credential } = req.body; //  recibe el token original
 
-    if (!googleData || !googleData.email) {
-        return res.status(400).json({ error: "Datos inválidos de Google." });
+    if (!credential) {
+        return res.status(400).json({ error: "Token de Google no recibido." });
     }
 
     try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const email = payload.email;
+        const name = payload.name;
+
         const clientes = new Clientes();
         await clientes.conectar();
-        let cliente = await clientes.buscar(googleData.email);
+        let cliente = await clientes.buscar(email);
 
         if (!cliente) {
-            cliente = new Cliente(googleData.email, "user", googleData.name);
+            cliente = new Cliente(email, "user", name);
             await clientes.insertar(cliente);
+            await registrarContactoEnHubspot(cliente);
         }
 
         const token = generarToken(cliente);
         cliente.autorizar(token);
         res.json({ cliente });
     } catch (err) {
-        res.status(500).json({ error: "Error al acceder al sistema." });
+        console.error("❌ Error al verificar token de Google:", err);
+        res.status(500).json({ error: "Error al verificar el token de Google." });
     }
 });
 
@@ -141,6 +156,7 @@ router.post("/verificar-codigo", async (req, res) => {
     await clientes.conectar();
     const cliente = new Cliente(email, registro.password);
     await clientes.insertar(cliente);
+    await registrarContactoEnHubspot(cliente);
     delete codigosVerificacion[email];
 
     res.json({ mensaje: "Cliente registrado correctamente." });
@@ -167,7 +183,7 @@ router.get('/verificar', async (req, res) => {
             verificado = true;
             return res.json({ email: datos.email, verificado });
         } else {
-            res.redirect('http://localhost:3000/registroError');
+            res.redirect(`${process.env.CLIENTE_URL}/registroError`);
             return;
         }
     }
