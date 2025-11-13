@@ -1,4 +1,3 @@
-// Importaciones de Material UI
 import {
   Box,
   Typography,
@@ -9,46 +8,27 @@ import {
   Snackbar,
   Alert
 } from "@mui/material";
-
-// Ícono de perfil
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-
-// Hooks de React
 import { useContext, useEffect, useState } from "react";
-
-// Contexto global del cliente
 import { ClienteContext } from "../context/ClienteContext.js";
-
-// Navegación con React Router
 import { useNavigate } from "react-router-dom";
-
-// Función para actualizar los datos del cliente en el servidor
 import actualizarCliente from "../services/actualizacionClientes.js";
 
-/**
- * Componente ClienteDatos
- * Permite al usuario ver y editar sus datos personales.
- */
 const ClienteDatos = () => {
-  // Accede al cliente desde el contexto
   const { cliente, setCliente } = useContext(ClienteContext);
 
-  // Estados locales para los campos del formulario
   const [nombre, setNombre] = useState(cliente?.nombre || "");
   const [direccion, setDireccion] = useState(cliente?.direccion || "");
-  const [telefono, setTelefono] = useState(cliente?.telefono || "");
+  const [telefono, setTelefono] = useState(cliente?.telefono?.replace("+34", "") || "");
 
-  // Estado para mostrar error si el nombre está vacío
   const [errorNombre, setErrorNombre] = useState(false);
+  const [errorTelefono, setErrorTelefono] = useState(false);
 
-  // Estados para mostrar mensajes de éxito o error
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false);
 
-  // Hook para navegar entre rutas
   const navigate = useNavigate();
 
-  // Al montar el componente, recupera el cliente desde sessionStorage si no está en contexto
   useEffect(() => {
     if (!cliente) {
       const clienteSesion = JSON.parse(sessionStorage.getItem("cliente"));
@@ -56,42 +36,37 @@ const ClienteDatos = () => {
     }
   }, []);
 
-  /**
-   * Maneja el guardado de los datos
-   * Valida el nombre, actualiza el cliente y muestra feedback
-   */
   const handleGuardar = async () => {
-    if (!nombre.trim()) {
-      setErrorNombre(true);
-      return;
-    }
+    const nombreValido = nombre.trim();
+    const telefonoValido = telefono.trim();
 
-    setErrorNombre(false);
+    const telefonoFormatoValido = /^\d{9}$/.test(telefonoValido);
 
-    // Crea un nuevo objeto cliente con los datos actualizados
+    setErrorNombre(!nombreValido);
+    setErrorTelefono(!telefonoValido || !telefonoFormatoValido);
+
+    if (!nombreValido || !telefonoValido || !telefonoFormatoValido) return;
+
     const clienteActualizado = {
       ...cliente,
-      nombre: nombre.trim(),
+      nombre: nombreValido,
       direccion: direccion.trim(),
-      telefono: telefono.trim()
+      telefono: `+34${telefonoValido}`
     };
 
-    // Llama al servicio para actualizar en el backend
     const respuestaCorrecta = await actualizarCliente(clienteActualizado);
 
     if (respuestaCorrecta) {
-      // Actualiza el contexto y sessionStorage
       setCliente(clienteActualizado);
       sessionStorage.setItem("cliente", JSON.stringify(clienteActualizado));
-      setOpenSnackbar(true); // Muestra mensaje de éxito
+      setOpenSnackbar(true);
     } else {
-      setOpenErrorSnackbar(true); // Muestra mensaje de error
+      setOpenErrorSnackbar(true);
     }
   };
 
   return (
     <Box sx={{ maxWidth: 600, mx: "auto", mt: 4, p: 3 }}>
-      {/* Encabezado con avatar */}
       <Box sx={{ textAlign: "center", mb: 3 }}>
         <Avatar sx={{ width: 100, height: 100, mx: "auto", bgcolor: "primary.main" }}>
           <AccountCircleIcon sx={{ fontSize: 60 }} />
@@ -101,7 +76,6 @@ const ClienteDatos = () => {
         </Typography>
       </Box>
 
-      {/* Formulario de edición */}
       <Paper sx={{ p: 3 }}>
         <TextField
           fullWidth
@@ -124,13 +98,20 @@ const ClienteDatos = () => {
         />
         <TextField
           fullWidth
-          label="Teléfono"
+          label="Teléfono (solo 9 dígitos)"
           variant="outlined"
+          required
           value={telefono}
-          onChange={(e) => setTelefono(e.target.value)}
+          onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))}
+          error={errorTelefono}
+          helperText={
+            errorTelefono
+              ? "Introduce los 9 dígitos del teléfono sin prefijo"
+              : "Se añadirá automáticamente el +34"
+          }
+          sx={{ mb: 3 }}
         />
 
-        {/* Botones de acción */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
           <Button variant="outlined" onClick={() => navigate(-1)}>
             Volver
@@ -141,7 +122,6 @@ const ClienteDatos = () => {
         </Box>
       </Paper>
 
-      {/* Snackbar de éxito */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}
@@ -153,7 +133,6 @@ const ClienteDatos = () => {
         </Alert>
       </Snackbar>
 
-      {/* Snackbar de error */}
       <Snackbar
         open={openErrorSnackbar}
         autoHideDuration={3000}

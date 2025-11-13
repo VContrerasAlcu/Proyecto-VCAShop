@@ -37,7 +37,7 @@ const Registro = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3001/clientes/registro", {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/clientes/registro`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -66,7 +66,7 @@ const Registro = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3001/clientes/verificar-codigo", {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/clientes/verificar-codigo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

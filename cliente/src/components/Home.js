@@ -9,6 +9,12 @@ import { CategoriaContext } from "../context/CategoriaContext.js";
 import { ClienteContext } from "../context/ClienteContext.js";
 import actualizarProductos from "../services/actualizacionProductos.js";
 import { productoEnCarro } from "../services/utilsCarro.js";
+import { AvisoContext } from "../context/AvisoContext.js";
+import Swal from 'sweetalert2';
+
+
+
+
 
 /**
  * Componente Home
@@ -24,6 +30,30 @@ function Home() {
   const [productosCargados, setProductosCargados] = useState(false);
   const { categoriaSeleccionada, setCategoriaSeleccionada } = useContext(CategoriaContext);
   const { cliente } = useContext(ClienteContext);
+  const { avisoMostrado, setAvisoMostrado } = useContext(AvisoContext);
+  
+
+  useEffect(() => {
+    if (!avisoMostrado) {
+      Swal.fire({
+        title: '🛍️ Simulación de tienda',
+        html: `
+          <p>Esta tienda es una <strong>simulación</strong> creada como proyecto final del Grado Superior de DAW</p>
+          <p>en el <strong>Instituto La Marisma de Huelva</strong>.</p>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#3085d6',
+        background: '#fefefe',
+        customClass: {
+          popup: 'animated fadeInDown'
+        }
+      });
+      setAvisoMostrado(true);
+    }
+
+
+  }, [avisoMostrado, setAvisoMostrado]);
 
   /**
    * Carga los productos desde la API si no están en el contexto
@@ -32,7 +62,7 @@ function Home() {
     if (!categoriaSeleccionada) setCategoriaSeleccionada('destacados');
 
     if (productos.length === 0) {
-      fetch("http://localhost:3001/productos")
+      fetch(`${process.env.REACT_APP_API_URL}/productos`)
         .then((response) => response.json())
         .then((data) => {
           const arrayProductos = data.map(

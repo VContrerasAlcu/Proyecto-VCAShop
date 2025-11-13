@@ -24,6 +24,8 @@ import { productosContext } from "../context/productosContext.js";
 import Carro from "../classes/Carro.js";
 import Producto from "../classes/Producto.js";
 import actualizarProductos from "../services/actualizacionProductos.js";
+import { useEffect } from "react";
+
 
 /**
  * Componente ProductoMax
@@ -32,12 +34,38 @@ import actualizarProductos from "../services/actualizacionProductos.js";
 function ProductoMax() {
   const { productoEnContext, setProducto } = useContext(productoContext);
   const navigate = useNavigate();
-  const [cantidad, setCantidad] = useState(0);
+  const [cantidad, setCantidad] = useState(1);
 
   const { socket } = useContext(SocketContext);
   const { carro, setCarro } = useContext(CarroContext);
   const { cliente } = useContext(ClienteContext);
   const { productos, setProductos } = useContext(productosContext);
+  const [interesRegistrado, setInteresRegistrado] = useState(false);
+
+
+
+  useEffect(() => {
+    if (cliente && productoEnContext && !interesRegistrado) {
+      fetch(`${process.env.REACT_APP_API_URL}/hubspot/registro-interes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: cliente.email,
+          producto: {
+            nombre: productoEnContext.nombre,
+            precio: productoEnContext.precio,
+            categoria: productoEnContext.categoria,
+            descripcion: productoEnContext.descripcion,
+          },
+        }),
+      }).then(() => {
+        setInteresRegistrado(true); // ← evita duplicados
+      });
+    }
+  }, [cliente, productoEnContext, interesRegistrado]);
+
+
+
 
   /**
    * Añade el producto al carrito

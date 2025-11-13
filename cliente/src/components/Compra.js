@@ -1,4 +1,3 @@
-// Importaciones de React y Material UI
 import { useContext, useEffect, useState } from "react";
 import {
   Box,
@@ -13,51 +12,43 @@ import {
   Snackbar,
   Alert
 } from "@mui/material";
-
-// Ícono para guardar dirección
 import SaveIcon from "@mui/icons-material/Save";
-
-// Contextos globales
 import { ClienteContext } from "../context/ClienteContext.js";
 import { CarroContext } from "../context/CarroContext.js";
-
-// Navegación con React Router
 import { useNavigate } from "react-router-dom";
-
-// Servicio para actualizar datos del cliente
 import actualizarCliente from "../services/actualizacionClientes.js";
 
-/**
- * Componente Compra
- * Muestra los datos del cliente, resumen del pedido y lanza el pago a Redsys.
- */
 const Compra = () => {
   const { cliente, setCliente } = useContext(ClienteContext);
   const { carro } = useContext(CarroContext);
   const navigate = useNavigate();
 
-  // Estado para la dirección de envío
   const [direccion, setDireccion] = useState(cliente?.direccion || "");
+  const [telefono, setTelefono] = useState(cliente?.telefono?.replace("+34", "") || "");
 
-  // Validación de dirección
   const [errorDireccion, setErrorDireccion] = useState(false);
+  const [errorTelefono, setErrorTelefono] = useState(false);
 
-  // Estados para mostrar mensajes de éxito o error
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
 
-  // Calcula el total del pedido
   const total = carro.reduce(
     (acumulado, item) => acumulado + item.producto.precio * item.cantidad,
     0
   );
 
-  /**
-   * Actualiza la dirección del cliente en el servidor
-   */
   const handleActualizarDireccion = async () => {
-    if (direccion.trim()) {
-      const clienteActualizado = { ...cliente, direccion: direccion.trim() };
+    const direccionValida = direccion.trim();
+    const telefonoValido = telefono.trim();
+    const telefonoFormatoValido = /^\d{9}$/.test(telefonoValido);
+
+    if (direccionValida && telefonoFormatoValido) {
+      const clienteActualizado = {
+        ...cliente,
+        direccion: direccionValida,
+        telefono: `+34${telefonoValido}`
+      };
+
       const respuestaCorrecta = await actualizarCliente(clienteActualizado);
 
       if (respuestaCorrecta) {
@@ -70,12 +61,9 @@ const Compra = () => {
     }
   };
 
-  /**
-   * Envía los datos del pedido al backend para generar el pago con Redsys
-   */
   const enviarPagoARedsys = async () => {
     try {
-      const respuesta = await fetch("http://localhost:3001/pago/generarPago", {
+      const respuesta = await fetch(`${process.env.REACT_APP_API_URL}/pago/generarPago`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cliente, carro, total })
@@ -83,7 +71,6 @@ const Compra = () => {
 
       const data = await respuesta.json();
 
-      // Crea y envía el formulario a Redsys
       const form = document.createElement("form");
       form.method = "POST";
       form.action = data.url;
@@ -110,27 +97,24 @@ const Compra = () => {
     }
   };
 
-  /**
-   * Maneja el botón "Pagar"
-   * Valida la dirección, actualiza datos y lanza el pago
-   */
   const handlePagar = async () => {
-    if (!direccion.trim()) {
-      setErrorDireccion(true);
-      return;
-    }
+    const direccionValida = direccion.trim();
+    const telefonoValido = telefono.trim();
+    const telefonoFormatoValido = /^\d{9}$/.test(telefonoValido);
 
-    setErrorDireccion(false);
+    setErrorDireccion(!direccionValida);
+    setErrorTelefono(!telefonoFormatoValido);
+
+    if (!direccionValida || !telefonoFormatoValido) return;
+
     await handleActualizarDireccion();
     await enviarPagoARedsys();
   };
 
-  // Vuelve a la pantalla anterior
   const handleVolver = () => {
     navigate(-1);
   };
 
-  // Si el cliente no tiene nombre, redirige a completar datos
   useEffect(() => {
     if (!cliente.nombre) {
       navigate('/datosCliente');
@@ -139,7 +123,6 @@ const Compra = () => {
 
   return (
     <Box sx={{ maxWidth: 700, mx: "auto", mt: 4, p: 3 }}>
-      {/* Logo */}
       <Box sx={{ textAlign: "center", mb: 3 }}>
         <Avatar
           src="/images/logo.png"
@@ -148,13 +131,11 @@ const Compra = () => {
         />
       </Box>
 
-      {/* Datos del cliente */}
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
           Datos del cliente
         </Typography>
 
-        {/* Nombre (solo lectura) */}
         <TextField
           fullWidth
           variant="outlined"
@@ -164,8 +145,7 @@ const Compra = () => {
           sx={{ mb: 3 }}
         />
 
-        {/* Dirección editable con botón de guardar */}
-        <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start", flexWrap: "wrap" }}>
           <TextField
             fullWidth
             variant="outlined"
@@ -175,8 +155,24 @@ const Compra = () => {
             placeholder="Introduce tu dirección de envío"
             error={errorDireccion}
             helperText={errorDireccion ? "Por favor, introduce una dirección" : ""}
+            sx={{ flex: 1 }}
           />
-          <Tooltip title="Actualizar dirección">
+          <TextField
+            fullWidth
+            variant="outlined"
+            label="Teléfono (9 dígitos)"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))}
+            placeholder="Ej: 612345678"
+            error={errorTelefono}
+            helperText={
+              errorTelefono
+                ? "Introduce un número válido de 9 dígitos"
+                : "Se añadirá automáticamente el prefijo +34"
+            }
+            sx={{ flex: 1 }}
+          />
+          <Tooltip title="Actualizar datos">
             <IconButton
               color="primary"
               onClick={handleActualizarDireccion}
@@ -185,40 +181,14 @@ const Compra = () => {
               <SaveIcon />
             </IconButton>
           </Tooltip>
-
-          {/* Snackbar de éxito */}
-          <Snackbar
-            open={openSuccess}
-            autoHideDuration={3000}
-            onClose={() => setOpenSuccess(false)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          >
-            <Alert severity="success" variant="filled" onClose={() => setOpenSuccess(false)}>
-              Dirección guardada correctamente
-            </Alert>
-          </Snackbar>
-
-          {/* Snackbar de error */}
-          <Snackbar
-            open={openError}
-            autoHideDuration={3000}
-            onClose={() => setOpenError(false)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          >
-            <Alert severity="error" variant="filled" onClose={() => setOpenError(false)}>
-              No se pudo guardar la dirección. Inténtalo de nuevo.
-            </Alert>
-          </Snackbar>
         </Box>
       </Paper>
 
-      {/* Resumen del pedido */}
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
           Resumen del pedido
         </Typography>
 
-        {/* Lista de productos */}
         {carro.map((item) => (
           <Box key={item.producto.id} sx={{ my: 1 }}>
             <Typography>
@@ -230,13 +200,11 @@ const Compra = () => {
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Total del pedido */}
         <Typography variant="h6" align="right" sx={{ fontWeight: "bold" }}>
           Total: {total.toFixed(2)} €
         </Typography>
       </Paper>
 
-      {/* Botones de acción */}
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <Button variant="contained" color="secondary" onClick={handleVolver}>
           Volver
@@ -245,6 +213,28 @@ const Compra = () => {
           Pagar
         </Button>
       </Box>
+
+      <Snackbar
+        open={openSuccess}
+        autoHideDuration={3000}
+        onClose={() => setOpenSuccess(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="success" variant="filled" onClose={() => setOpenSuccess(false)}>
+          Datos actualizados correctamente
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={openError}
+        autoHideDuration={3000}
+        onClose={() => setOpenError(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="error" variant="filled" onClose={() => setOpenError(false)}>
+          No se pudo actualizar los datos. Inténtalo de nuevo.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

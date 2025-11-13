@@ -2,7 +2,7 @@
 export default async function actualizarCliente(cliente) {
   try {
     // Realiza una petición POST al servidor con los datos del cliente
-    const response = await fetch("http://localhost:3001/clientes/actualizarDatos", {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/clientes/actualizarDatos`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json" 

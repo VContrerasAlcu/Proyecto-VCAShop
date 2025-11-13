@@ -21,6 +21,7 @@ export default function Validacion() {
   const { setCarro } = useContext(CarroContext);
   const { socket } = useContext(SocketContext);
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   /**
    * Maneja el login tradicional
@@ -32,7 +33,7 @@ export default function Validacion() {
     const password = formData.get("password");
 
     try {
-      const res = await fetch("http://localhost:3001/login", {
+      const res = await fetch(`${API_URL}/clientes/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -51,7 +52,7 @@ export default function Validacion() {
         setCliente(cliente);
         socket.emit("registro", cliente.email);
 
-        const resCarro = await fetch("http://localhost:3001/carros/cargar", {
+        const resCarro = await fetch(`${process.env.REACT_APP_API_URL}/carros/cargar`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cliente),
@@ -75,13 +76,12 @@ export default function Validacion() {
    * Maneja el login con Google
    */
   const handleGoogleSuccess = (credentialResponse) => {
-    const decoded = jwtDecode(credentialResponse.credential);
-
-    fetch("http://localhost:3001/clientes/login-google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ googleData: decoded }),
-    })
+    
+      fetch(`${process.env.REACT_APP_API_URL}/clientes/login-google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      })
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Error desconocido");
@@ -94,7 +94,7 @@ export default function Validacion() {
           setCliente(clienteGoogle);
           socket.emit("registro", clienteGoogle.email);
 
-          const resCarro = await fetch("http://localhost:3001/carros/cargar", {
+          const resCarro = await fetch(`${process.env.REACT_APP_API_URL}/carros/cargar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(clienteGoogle),

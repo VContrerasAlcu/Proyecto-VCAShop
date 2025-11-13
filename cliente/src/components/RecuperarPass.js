@@ -29,7 +29,7 @@ const RecuperarPass = () => {
     setError("");
     setMensaje("");
     try {
-      const res = await fetch("http://localhost:3001/clientes/recuperar", {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/clientes/recuperar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
@@ -57,7 +57,7 @@ const RecuperarPass = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3001/clientes/verificar-recuperacion", {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/clientes/verificar-recuperacion`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
