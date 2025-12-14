@@ -17,7 +17,7 @@ export function SocketProvider({ children }) {
    * Se configuran eventos de conexión y desconexión
    */
   useEffect(() => {
-    const webSocket = io(`${process.env.REACT_APP_API_URL}`, {
+    const webSocket = io(`${process.env.REACT_APP_SOCKET_URL}`, {
       autoConnect: true,       // Conecta automáticamente al cargar
       reconnection: true       // Intenta reconectar si se pierde la conexión
     });

@@ -33,7 +33,7 @@ const Conocenos = () => (
     </Typography>
     <Box sx={{ textAlign: "center", mb: 4 }}>
       <Avatar
-        src="/images/vicente.jpg" 
+        src="/vicente.jpg" 
         alt="Vicente Contreras Alcuña"
         sx={{ width: 120, height: 120, mx: "auto", mb: 1 }}
       />

@@ -131,7 +131,7 @@ export default function Validacion() {
         textAlign: "center",
       }}
     >
-      <img src="/images/logo.png" alt="Logo" style={{ maxWidth: 180 }} />
+      <img src="/logo.png" alt="Logo" style={{ maxWidth: 180 }} />
 
       <Typography variant="h5" sx={{ mt: 2, mb: 1, fontWeight: "bold" }}>
         Hola!!

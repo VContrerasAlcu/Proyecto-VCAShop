@@ -105,7 +105,7 @@ const Registro = () => {
     >
       {/* Logo y título */}
       <Box sx={{ textAlign: "center", mb: 3 }}>
-        <img src="/images/logo.png" alt="Logo" style={{ maxWidth: "180px" }} />
+        <img src="/logo.png" alt="Logo" style={{ maxWidth: "180px" }} />
         <Typography variant="h5" sx={{ fontWeight: "bold", mt: 1 }}>
           Registro de Cliente
         </Typography>

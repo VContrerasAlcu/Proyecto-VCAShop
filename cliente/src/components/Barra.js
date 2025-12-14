@@ -268,7 +268,7 @@ return (
         {/* Logo de la tienda, enlazado a la página principal */}
         <IconButton component={Link} to="/" sx={{ p: 0 }}>
           <img
-            src="/images/logoTransp.png"
+            src="/logoTransp.png"
             alt="Logo"
             style={{ height: "90px", cursor: "pointer" }}
           />
