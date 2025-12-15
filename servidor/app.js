@@ -68,6 +68,8 @@ cron.schedule('0 3 * * *', async () => {
 
 // Servir archivos estáticos desde la carpeta 'public'
 app.use(express.static(path.join(process.cwd(), 'public')));
+// Servir imágenes en la ruta /images
+app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
 
 // Middleware para parsear JSON en las peticiones
 app.use(express.json());
@@ -87,4 +89,4 @@ app.use("/hubspot", rutaHubspot);
 const PORT = 3001;
 
 // Iniciar el servidor
-server.listen(PORT, () => console.log(`servidor escuchando en el puerto ${PORT}..`));
+server.listen(PORT, '0.0.0.0', () => console.log(`servidor escuchando en el puerto ${PORT}..`));

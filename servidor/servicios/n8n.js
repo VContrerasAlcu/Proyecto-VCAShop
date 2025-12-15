@@ -11,6 +11,7 @@ export async function enviarN8N(cliente, carro) {
       body: JSON.stringify({
         nombre: cliente.nombre,
         telefono: cliente.telefono,
+        email: cliente.email,
         productos: productosComprados,
       }),
     });
