@@ -19,11 +19,24 @@ const Conocenos = () => (
     <Typography variant="h3" gutterBottom fontWeight="bold">
       Conócenos
     </Typography>
-    <Typography variant="body1" sx={{ mb: 3 }}>
-      Somos una empresa ficticia creada como parte de un proyecto de fin de grado.
-      El objetivo es simular una experiencia de compra moderna, intuitiva y funcional,
-      fusionando diseño visual y tecnología de vanguardia.
-    </Typography>
+    
+    {/* Fondo azul claro para el primer texto */}
+    <Paper 
+      elevation={0}
+      sx={{ 
+        p: 3, 
+        mb: 3,
+        backgroundColor: '#E3F2FD', // Azul muy claro
+        borderRadius: 2,
+        borderLeft: '4px solid #1976D2' // Borde azul para destacar
+      }}
+    >
+      <Typography variant="body1">
+        Somos una empresa ficticia creada como parte de un proyecto de fin de grado.
+        El objetivo es simular una experiencia de compra moderna, intuitiva y funcional,
+        fusionando diseño visual y tecnología de vanguardia.
+      </Typography>
+    </Paper>
 
     <Divider sx={{ my: 4 }} />
 
@@ -35,19 +48,33 @@ const Conocenos = () => (
       <Avatar
         src="/vicente.jpg" 
         alt="Vicente Contreras Alcuña"
-        sx={{ width: 120, height: 120, mx: "auto", mb: 1 }}
+        sx={{ width: 120, height: 120, mx: "auto", mb: 2 }}
       />
       <Typography variant="subtitle1" fontWeight="bold">
         Vicente Contreras Alcuña
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Desarrollador y autor del proyecto
       </Typography>
-      <Typography variant="body2" sx={{ maxWidth: 600, mx: "auto" }}>
-        Este proyecto ha sido desarrollado por mí como trabajo de fin de grado.
-        Todo — desde la interfaz hasta la lógica interna — ha sido diseñado con cariño,
-        cuidado técnico y un toque personal. ¡Gracias por visitarlo!
-      </Typography>
+      
+      {/* Fondo azul claro para el segundo texto */}
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3, 
+          maxWidth: 600, 
+          mx: "auto",
+          backgroundColor: '#E8F5E9', // Verde azulado muy claro
+          borderRadius: 2,
+          borderLeft: '4px solid #388E3C' // Borde verde para diferenciar
+        }}
+      >
+        <Typography variant="body2" sx={{ textAlign: 'center' }}>
+          Este proyecto ha sido desarrollado por mí como trabajo de fin de grado.
+          Todo — desde la interfaz hasta la lógica interna — ha sido diseñado con cariño,
+          cuidado técnico y un toque personal. ¡Gracias por visitarlo!
+        </Typography>
+      </Paper>
     </Box>
 
     <Divider sx={{ my: 4 }} />
@@ -63,7 +90,20 @@ const Conocenos = () => (
         "“Me encantó cómo funciona el sistema en tiempo real.”"
       ].map((texto, i) => (
         <Grid item xs={12} sm={4} key={i}>
-          <Paper sx={{ p: 2, minHeight: 120 }}>
+          <Paper 
+            sx={{ 
+              p: 2, 
+              minHeight: 120,
+              backgroundColor: i === 0 ? '#F3E5F5' :  // Lila claro
+                            i === 1 ? '#FFF3E0' :  // Naranja claro
+                            '#E0F7FA',            // Cian claro
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: 3
+              }
+            }}
+          >
             <Typography variant="body2" sx={{ fontStyle: "italic" }}>
               {texto}
             </Typography>
@@ -81,18 +121,29 @@ const Conocenos = () => (
     <Typography variant="h5" gutterBottom fontWeight="bold">
       Ubicación
     </Typography>
-    <Typography variant="body2" sx={{ mb: 2 }}>
-      Calle Concepción, 1, Huelva, España
-    </Typography>
-    <iframe
-      title="Ubicación ficticia"
-      src="https://www.google.com/maps?q=Calle+Concepción,+1,+Huelva&output=embed"
-      width="100%"
-      height="300"
-      style={{ border: 0 }}
-      allowFullScreen=""
-      loading="lazy"
-    />
+    <Paper 
+      sx={{ 
+        p: 2, 
+        mb: 2,
+        backgroundColor: '#FFF9C4', // Amarillo muy claro
+        borderRadius: 1
+      }}
+    >
+      <Typography variant="body2">
+        Calle Concepción, 1, Huelva, España
+      </Typography>
+    </Paper>
+    <Box sx={{ borderRadius: 1, overflow: 'hidden', boxShadow: 1 }}>
+      <iframe
+        title="Ubicación ficticia"
+        src="https://www.google.com/maps?q=Calle+Concepción,+1,+Huelva&output=embed"
+        width="100%"
+        height="300"
+        style={{ border: 0 }}
+        allowFullScreen=""
+        loading="lazy"
+      />
+    </Box>
 
     <Divider sx={{ my: 4 }} />
 
@@ -100,22 +151,34 @@ const Conocenos = () => (
     <Typography variant="h5" gutterBottom fontWeight="bold">
       Contáctanos
     </Typography>
-    <Typography variant="body2" sx={{ mb: 1 }}>
-      📧 Correo: vcontrerasalcu@gmail.com
-    </Typography>
-    <Typography variant="body2" sx={{ mb: 1 }}>
-      ☎️ Teléfono: +34 600 .....
-    </Typography>
-    <Typography variant="body2">
-      🌐 Web:{" "}
-      <MuiLink
-        href="https://tu-tienda-ficticia.com"
-        target="_blank"
-        rel="noopener"
-      >
-        tu-tienda-ficticia.com
-      </MuiLink>
-    </Typography>
+    <Paper 
+      sx={{ 
+        p: 3,
+        backgroundColor: '#F5F5F5', // Gris muy claro
+        borderRadius: 2
+      }}
+    >
+      <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+        <Box component="span" sx={{ mr: 1 }}>📧</Box> 
+        Correo: vcontrerasalcu@gmail.com
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+        <Box component="span" sx={{ mr: 1 }}>☎️</Box> 
+        Teléfono: +34 600 .....
+      </Typography>
+      <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box component="span" sx={{ mr: 1 }}>🌐</Box> 
+        Web:{" "}
+        <MuiLink
+          href="https://vcontreras.es"
+          target="_blank"
+          rel="noopener"
+          sx={{ ml: 0.5 }}
+        >
+          https://vcontreras.es
+        </MuiLink>
+      </Typography>
+    </Paper>
   </Box>
 );
 

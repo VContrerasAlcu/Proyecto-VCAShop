@@ -5,7 +5,12 @@ import {
   Avatar,
   Button,
   IconButton,
-  Stack
+  Stack,
+  Grid,
+  useMediaQuery,
+  useTheme,
+  Card,
+  CardContent,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { CarroContext } from "../context/CarroContext.js";
@@ -27,6 +32,9 @@ const ProductoCarro = ({ producto, cantidad }) => {
   const { socket } = useContext(SocketContext);
   const { productos, setProductos } = useContext(productosContext);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
   // Estado local para la cantidad del producto
   const [cantidadProducto, setCantidadProducto] = useState(
@@ -107,35 +115,237 @@ const ProductoCarro = ({ producto, cantidad }) => {
    * Renderiza el producto dentro del carrito
    */
   return (
-    <Stack
-      direction="row"
-      spacing={2}
-      alignItems="center"
-      sx={{ p: 2, borderBottom: "1px solid #ddd" }}
+    <Card
+      variant="outlined"
+      sx={{
+        mb: 2,
+        overflow: 'visible',
+        borderRadius: 2,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      }}
     >
-      {/* Imagen del producto */}
-      <Avatar variant="square" src={producto.imagen} sx={{ width: 80, height: 80 }} />
+      <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+        {/* Versión para desktop/tablet */}
+        {!isMobile ? (
+          <Grid container alignItems="center" spacing={2}>
+            {/* Imagen del producto */}
+            <Grid item xs={12} sm={3} md={2}>
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Avatar 
+                  variant="square" 
+                  src={producto.imagen} 
+                  sx={{ 
+                    width: { xs: 70, sm: 80, md: 90 }, 
+                    height: { xs: 70, sm: 80, md: 90 },
+                    borderRadius: 1
+                  }} 
+                />
+              </Box>
+            </Grid>
 
-      {/* Nombre y controles de cantidad */}
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography variant="h6">{producto.nombre}</Typography>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Button variant="outlined" size="small" onClick={() => actualizarCantidad(cantidad - 1)}>-</Button>
-          <Typography variant="body1">{cantidadProducto}</Typography>
-          <Button variant="outlined" size="small" onClick={() => actualizarCantidad(cantidad + 1)}>+</Button>
-        </Stack>
-      </Box>
+            {/* Nombre del producto */}
+            <Grid item xs={12} sm={3} md={4}>
+              <Typography 
+                variant={isTablet ? "subtitle1" : "h6"} 
+                sx={{ 
+                  fontWeight: 500,
+                  fontSize: { xs: '0.95rem', sm: '1rem', md: '1.1rem' }
+                }}
+              >
+                {producto.nombre}
+              </Typography>
+            </Grid>
 
-      {/* Precio total */}
-      <Typography variant="h6" color="primary">
-        {precioTotal.toFixed(2)} €
-      </Typography>
+            {/* Controles de cantidad */}
+            <Grid item xs={12} sm={3} md={2}>
+              <Stack 
+                direction="row" 
+                spacing={1} 
+                alignItems="center" 
+                justifyContent={isMobile ? "center" : "flex-start"}
+              >
+                <Button 
+                  variant="outlined" 
+                  size="small" 
+                  onClick={() => actualizarCantidad(cantidadProducto - 1)}
+                  sx={{ 
+                    minWidth: { xs: 32, sm: 36 },
+                    height: { xs: 32, sm: 36 },
+                    p: 0
+                  }}
+                >
+                  -
+                </Button>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    minWidth: 30, 
+                    textAlign: 'center',
+                    fontSize: { xs: '0.9rem', sm: '1rem' }
+                  }}
+                >
+                  {cantidadProducto}
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  size="small" 
+                  onClick={() => actualizarCantidad(cantidadProducto + 1)}
+                  sx={{ 
+                    minWidth: { xs: 32, sm: 36 },
+                    height: { xs: 32, sm: 36 },
+                    p: 0
+                  }}
+                >
+                  +
+                </Button>
+              </Stack>
+            </Grid>
 
-      {/* Botón de eliminar */}
-      <IconButton color="error" onClick={() => eliminarProducto(producto)}>
-        <DeleteIcon />
-      </IconButton>
-    </Stack>
+            {/* Precio total */}
+            <Grid item xs={6} sm={2} md={2}>
+              <Typography 
+                variant="h6" 
+                color="primary"
+                sx={{ 
+                  textAlign: 'center',
+                  fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
+                  fontWeight: 600
+                }}
+              >
+                {precioTotal.toFixed(2)} €
+              </Typography>
+            </Grid>
+
+            {/* Botón de eliminar */}
+            <Grid item xs={6} sm={1} md={2}>
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <IconButton 
+                  color="error" 
+                  onClick={() => eliminarProducto(producto)}
+                  size={isMobile ? "small" : "medium"}
+                  sx={{ 
+                    '&:hover': { backgroundColor: 'error.light', color: 'white' }
+                  }}
+                >
+                  <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
+                </IconButton>
+              </Box>
+            </Grid>
+          </Grid>
+        ) : (
+          // Versión para móvil - diseño vertical
+          <Box>
+            {/* Fila superior: Imagen, nombre y precio */}
+            <Stack direction="row" spacing={1.5} alignItems="flex-start" sx={{ mb: 2 }}>
+              <Avatar 
+                variant="square" 
+                src={producto.imagen} 
+                sx={{ 
+                  width: 70, 
+                  height: 70,
+                  borderRadius: 1,
+                  flexShrink: 0
+                }} 
+              />
+              
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ 
+                    fontWeight: 500,
+                    fontSize: '0.95rem',
+                    mb: 0.5
+                  }}
+                >
+                  {producto.nombre}
+                </Typography>
+                
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography 
+                    variant="h6" 
+                    color="primary"
+                    sx={{ 
+                      fontSize: '1.1rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {precioTotal.toFixed(2)} €
+                  </Typography>
+                  
+                  <IconButton 
+                    color="error" 
+                    onClick={() => eliminarProducto(producto)}
+                    size="small"
+                    sx={{ 
+                      ml: 1,
+                      '&:hover': { backgroundColor: 'error.light', color: 'white' }
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Stack>
+              </Box>
+            </Stack>
+
+            {/* Fila inferior: Controles de cantidad */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              pt: 1,
+              borderTop: '1px solid',
+              borderColor: 'divider'
+            }}>
+              <Typography 
+                variant="body2" 
+                color="text.secondary"
+                sx={{ fontWeight: 500 }}
+              >
+                Cantidad:
+              </Typography>
+              
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Button 
+                  variant="outlined" 
+                  size="small" 
+                  onClick={() => actualizarCantidad(cantidadProducto - 1)}
+                  sx={{ 
+                    minWidth: 32,
+                    height: 32,
+                    p: 0
+                  }}
+                >
+                  -
+                </Button>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    minWidth: 30, 
+                    textAlign: 'center',
+                    fontSize: '0.95rem',
+                    fontWeight: 500
+                  }}
+                >
+                  {cantidadProducto}
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  size="small" 
+                  onClick={() => actualizarCantidad(cantidadProducto + 1)}
+                  sx={{ 
+                    minWidth: 32,
+                    height: 32,
+                    p: 0
+                  }}
+                >
+                  +
+                </Button>
+              </Stack>
+            </Box>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

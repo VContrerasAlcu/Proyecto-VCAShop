@@ -1,4 +1,3 @@
-// Importaciones necesarias desde React, Material UI, React Router y contextos personalizados
 import * as React from "react";
 import { useEffect, useContext, useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
@@ -12,68 +11,52 @@ import {
   Badge,
   MenuItem,
   Menu,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
-// Íconos de Material UI
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
-// Navegación con React Router
 import { Link } from "react-router-dom";
-
-// Contextos globales para estado compartido
 import { CarroContext } from "../context/CarroContext.js";
 import { ClienteContext } from "../context/ClienteContext.js";
 import { CategoriaContext } from "../context/CategoriaContext.js";
 
-// Íconos para categorías
 import StarIcon from "@mui/icons-material/Star";
 import ToysIcon from "@mui/icons-material/Toys";
 import CheckroomIcon from "@mui/icons-material/Checkroom";
 import DevicesIcon from "@mui/icons-material/Devices";
 import HomeIcon from "@mui/icons-material/Home";
 
-// Fuente personalizada
 import "@fontsource/inter";
-
-// Hook de navegación
 import { useNavigate } from "react-router-dom";
-
-// Componentes de búsqueda personalizados
 import BuscadorAutocompleto from "./BuscadorAutocompleto.js";
 import BuscadorResponsivo from "./BuscadorResponsivo.js";
-
-// Componente visual adicional
 import Chip from "@mui/material/Chip";
 import PlaceIcon from '@mui/icons-material/Place';
 
-// Componente principal de la barra de navegación
-  export default function PrimarySearchAppBar() {
-  // Acceso a los contextos globales
+export default function PrimarySearchAppBar() {
   const { carro, setCarro } = useContext(CarroContext);
   const { cliente, setCliente } = useContext(ClienteContext);
   const { setCategoriaSeleccionada } = useContext(CategoriaContext);
-
-  // Estados para controlar los menús desplegables
-  const [anchorEl, setAnchorEl] = useState(null); // Menú de perfil
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null); // Menú móvil
-  const [menuLateralAnchorEl, setMenuLateralAnchorEl] = useState(null); // Menú lateral de categorías
-
-  // Flags booleanos para saber si los menús están abiertos
+  
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+  const [menuLateralAnchorEl, setMenuLateralAnchorEl] = useState(null);
+  
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const isMenuLateralOpen = Boolean(menuLateralAnchorEl);
-
-  // Estado para el texto de búsqueda (no usado directamente aquí)
+  
   const [textoBusqueda, setTextoBusqueda] = useState("");
-
-  // Hook para redireccionar
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Al montar el componente, recupera el cliente desde sessionStorage
   useEffect(() => {
     const clienteGuardado = sessionStorage.getItem("cliente");
     if (clienteGuardado) {
@@ -86,45 +69,37 @@ import PlaceIcon from '@mui/icons-material/Place';
     }
   }, []);
 
-  // Cada vez que cambia el carrito, muestra en consola la cantidad de productos
   useEffect(() => {
     if (carro) {
       console.log("Barra re-renderizada. Productos en carro:", carro.length);
     }
   }, [carro]);
 
-  // Abre el menú de perfil
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Cierra el menú móvil
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
 
-  // Cierra el menú de perfil y el móvil
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
   };
 
-  // Abre el menú móvil
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  // Abre el menú lateral de categorías
   const handleMenuLateralOpen = (event) => {
     setMenuLateralAnchorEl(event.currentTarget);
   };
 
-  // Cierra el menú lateral
   const handleMenuLateralClose = () => {
     setMenuLateralAnchorEl(null);
   };
 
-  // Cierra sesión: limpia cliente y carro del estado y del sessionStorage
   const handleLogout = () => {
     setCliente(null);
     setCarro(null);
@@ -133,23 +108,24 @@ import PlaceIcon from '@mui/icons-material/Place';
     handleMenuClose();
   };
 
-  // Lista de categorías disponibles
-  const categorias = ["juguetes", "ropa", "electronica", "hogar", "destacados"];
-
-  // Menú de perfil (versión desktop)
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
       id="primary-search-account-menu"
       keepMounted
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
       open={isMenuOpen}
       onClose={handleMenuClose}
+      sx={{
+        '& .MuiPaper-root': {
+          maxWidth: 'calc(100vw - 32px)',
+          mt: 1,
+        }
+      }}
     >
       {cliente ? (
         <>
-          {/* Si el cliente está logueado, muestra acceso a cuenta y logout */}
           <MenuItem component={Link} to="/datosCliente" onClick={handleMenuClose}>
             Mi cuenta
           </MenuItem>
@@ -157,7 +133,6 @@ import PlaceIcon from '@mui/icons-material/Place';
         </>
       ) : (
         <>
-          {/* Si no está logueado, muestra opciones de login y registro */}
           <MenuItem component={Link} to="/validacion" onClick={handleMenuClose}>
             Entrar
           </MenuItem>
@@ -169,28 +144,31 @@ import PlaceIcon from '@mui/icons-material/Place';
     </Menu>
   );
 
-  // Menú móvil con acceso al carrito y perfil
   const renderMobileMenu = (
     <Menu
       anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
       id="primary-search-account-menu-mobile"
       keepMounted
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
+      sx={{
+        '& .MuiPaper-root': {
+          maxWidth: 'calc(100vw - 32px)',
+          mt: 1,
+        }
+      }}
     >
-      <MenuItem>
-        {/* Icono del carrito con contador */}
-        <IconButton size="large" color="inherit" component={Link} to="/carro">
+      <MenuItem onClick={handleMobileMenuClose} component={Link} to="/carro">
+        <IconButton size="large" color="inherit">
           <Badge badgeContent={carro ? carro.length : 0} color="error">
             <ShoppingCartIcon />
           </Badge>
         </IconButton>
-        <p>Carro</p>
+        <Box sx={{ ml: 2 }}>Carro</Box>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
-        {/* Icono de perfil */}
         <IconButton
           size="large"
           aria-label="cuenta de usuario"
@@ -200,22 +178,25 @@ import PlaceIcon from '@mui/icons-material/Place';
         >
           <AccountCircle />
         </IconButton>
-        <p>Perfil</p>
+        <Box sx={{ ml: 2 }}>Perfil</Box>
       </MenuItem>
     </Menu>
   );
 
-  // Menú lateral con categorías
   const renderMenuLateral = (
     <Menu
       anchorEl={menuLateralAnchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "left" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       transformOrigin={{ vertical: "top", horizontal: "left" }}
       open={isMenuLateralOpen}
       onClose={handleMenuLateralClose}
       keepMounted
+      sx={{
+        '& .MuiPaper-root': {
+          maxWidth: 'calc(100vw - 32px)',
+        }
+      }}
     >
-      {/* Cada categoría tiene su ícono y actualiza el estado global al seleccionarse */}
       <MenuItem onClick={() => { setCategoriaSeleccionada("juguetes"); handleMenuLateralClose(); }}>
         <ToysIcon sx={{ mr: 1 }} />
         Juguetes
@@ -246,152 +227,202 @@ import PlaceIcon from '@mui/icons-material/Place';
       </MenuItem>
     </Menu>
   );
- // Render principal del componente
-return (
-  // Contenedor general con flexGrow para ocupar todo el ancho disponible
-  <Box sx={{ flexGrow: 1 }}>
-    {/* Barra superior fija */}
-    <AppBar position="static">
-      <Toolbar>
-        {/* Botón para abrir el menú lateral de categorías */}
-        <IconButton
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="categorías"
-          onClick={handleMenuLateralOpen}
-          sx={{ mr: 2 }}
-        >
-          <MenuIcon />
-        </IconButton>
 
-        {/* Logo de la tienda, enlazado a la página principal */}
-        <IconButton component={Link} to="/" sx={{ p: 0 }}>
-          <img
-            src="/logoTransp.png"
-            alt="Logo"
-            style={{ height: "90px", cursor: "pointer" }}
-          />
-        </IconButton>
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static">
+        <Toolbar sx={{ 
+          minHeight: { xs: 64, sm: 70 },
+          flexWrap: { xs: 'wrap', sm: 'nowrap' },
+          py: { xs: 1, sm: 0 }
+        }}>
+          {/* Primera fila en móvil: Logo y botones */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: 'space-between',
+            mb: { xs: 1, sm: 0 }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="categorías"
+                onClick={handleMenuLateralOpen}
+                sx={{ mr: { xs: 1, sm: 2 } }}
+              >
+                <MenuIcon />
+              </IconButton>
 
-        {/* Buscador responsivo (adaptado a distintos tamaños de pantalla) */}
-        <Box sx={{ width: 300, ml: 4 }}>
-          <BuscadorResponsivo />
-        </Box>
+              <IconButton component={Link} to="/" sx={{ p: 0 }}>
+                <img
+                  src="/logoTransp.png"
+                  alt="Logo"
+                  style={{ 
+                    height: isMobile ? "60px" : "90px",
+                    cursor: "pointer",
+                    maxWidth: "100%"
+                  }}
+                />
+              </IconButton>
+            </Box>
 
-       
-        <Box sx={{ flexGrow: 1 }} />
+            {/* Botones de móvil a la derecha */}
+            <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center' }}>
+              <IconButton 
+                color="inherit"
+                component={Link}
+                to="/carro"
+                sx={{ mr: 1 }}
+              >
+                <Badge badgeContent={carro ? carro.length : 0} color="error">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+              
+              <IconButton
+                size="large"
+                aria-label="mostrar más"
+                aria-controls="primary-search-account-menu-mobile"
+                aria-haspopup="true"
+                onClick={handleMobileMenuOpen}
+                color="inherit"
+              >
+                <MoreIcon />
+              </IconButton>
+            </Box>
+          </Box>
 
-        {/* Íconos visibles solo en pantallas medianas o grandes */}
-        <Box sx={{ display: { xs: "none", md: "flex" } }}>
-          {/* Icono del carrito con contador de productos */}
-          <IconButton size="large" color="inherit" component={Link} to="/carro">
-            <Badge badgeContent={carro ? carro.length : 0} color="error">
-              <ShoppingCartIcon />
-            </Badge>
-          </IconButton>
+          {/* Segunda fila en móvil: Buscador */}
+          <Box sx={{ 
+            width: { xs: '100%', sm: 'auto' },
+            flex: { sm: 1 },
+            mx: { xs: 0, sm: 2, md: 4 }
+          }}>
+            <BuscadorResponsivo />
+          </Box>
 
-          {/* Icono de perfil para abrir el menú de usuario */}
-          <IconButton
-            size="large"
-            edge="end"
-            aria-label="cuenta de usuario"
-            aria-controls="primary-search-account-menu"
-            aria-haspopup="true"
-            onClick={handleProfileMenuOpen}
-            color="inherit"
-          >
-            <AccountCircle />
-          </IconButton>
-        </Box>
+          {/* Tercera parte: Iconos de desktop */}
+          <Box sx={{ 
+            display: { xs: 'none', sm: 'flex' },
+            alignItems: 'center',
+            ml: 'auto'
+          }}>
+            <IconButton size="large" color="inherit" component={Link} to="/carro">
+              <Badge badgeContent={carro ? carro.length : 0} color="error">
+                <ShoppingCartIcon />
+              </Badge>
+            </IconButton>
 
-        {/* Ícono de menú móvil (visible solo en pantallas pequeñas) */}
-        <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <IconButton
-            size="large"
-            aria-label="mostrar más"
-            aria-controls="primary-search-account-menu-mobile"
-            aria-haspopup="true"
-            onClick={handleMobileMenuOpen}
-            color="inherit"
-          >
-            <MoreIcon />
-          </IconButton>
-        </Box>
-      </Toolbar>
-    </AppBar>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="cuenta de usuario"
+              aria-controls="primary-search-account-menu"
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
-   
-    {renderMobileMenu}
-    {renderMenu}
-    {renderMenuLateral}
+      {renderMobileMenu}
+      {renderMenu}
+      {renderMenuLateral}
 
-    {/* Barra inferior con categorías destacadas */}
-    <Box sx={{ bgcolor: "#8B5E3C", px: 2, py: 1 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 2,
-          fontFamily: "Inter, sans-serif",
-        }}
-      >
-        {/* Mapeo de categorías para mostrar como botones con iconos */}
-        {["Juguetes", "Ropa", "Electrónica", "Hogar", "Destacados"].map((cat) => (
-          <Typography
-            key={cat}
-            variant="body2"
-            onClick={() => {
-              // Ajuste para que "Electrónica" se convierta en "electronica"
-              const nomCat = cat === "Electrónica" ? "Electronica" : cat;
-              setCategoriaSeleccionada(nomCat.toLowerCase());
-            }}
-            sx={{
-              cursor: "pointer",
-              textTransform: "uppercase",
-              fontWeight: cat === "Destacados" ? "bold" : "normal",
-              color: cat === "Destacados" ? "warning.main" : "white",
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              px: 1.2,
-              py: 0.5,
-              borderRadius: 2,
-              bgcolor: cat === "Destacados" ? "warning.light" : "rgba(255,255,255,0.1)",
-              "&:hover": {
-                bgcolor: "rgba(255,255,255,0.25)",
-              },
-            }}
-          >
-            {/* Íconos por categoría */}
-            {cat === "Juguetes" && <ToysIcon sx={{ fontSize: 18 }} />}
-            {cat === "Ropa" && <CheckroomIcon sx={{ fontSize: 18 }} />}
-            {cat === "Electrónica" && <DevicesIcon sx={{ fontSize: 18 }} />}
-            {cat === "Hogar" && <HomeIcon sx={{ fontSize: 18 }} />}
-            {cat === "Destacados" && <StarIcon sx={{ fontSize: 18 }} />}
-            {cat}
-          </Typography>
-        ))}
-
-        {/* Botón adicional para la sección "Conócenos" */}
-        <Chip
-          label="Conócenos"
-          icon={<PlaceIcon />}
-          component={Link}
-          to="/conocenos"
-          clickable
+      {/* Barra de categorías mejorada */}
+      <Box sx={{ 
+        bgcolor: "#8B5E3C", 
+        px: { xs: 1, sm: 2 }, 
+        py: 1, 
+        overflowX: 'auto',
+        '&::-webkit-scrollbar': {
+          height: 4,
+        },
+        '&::-webkit-scrollbar-track': {
+          background: 'rgba(255,255,255,0.1)',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: 'rgba(255,255,255,0.3)',
+          borderRadius: 2,
+        }
+      }}>
+        <Box
           sx={{
-            bgcolor: "primary.main",
-            color: "white",
-            fontWeight: "bold",
-            textTransform: "uppercase",
-            "&:hover": {
-              bgcolor: "primary.dark",
-            },
+            display: "flex",
+            justifyContent: { xs: "flex-start", sm: "center" },
+            gap: { xs: 1, sm: 2 },
+            fontFamily: "Inter, sans-serif",
+            flexWrap: { xs: "nowrap", sm: "wrap" },
+            minWidth: { xs: "max-content", sm: "auto" },
           }}
-        />
+        >
+          {["Juguetes", "Ropa", "Electrónica", "Hogar", "Destacados"].map((cat) => (
+            <Typography
+              key={cat}
+              variant="body2"
+              onClick={() => {
+                const nomCat = cat === "Electrónica" ? "Electronica" : cat;
+                setCategoriaSeleccionada(nomCat.toLowerCase());
+              }}
+              sx={{
+                cursor: "pointer",
+                textTransform: "uppercase",
+                fontWeight: cat === "Destacados" ? "bold" : "normal",
+                color: cat === "Destacados" ? "warning.main" : "white",
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                px: { xs: 0.8, sm: 1.2 },
+                py: 0.5,
+                borderRadius: 2,
+                bgcolor: cat === "Destacados" ? "warning.light" : "rgba(255,255,255,0.1)",
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.25)",
+                },
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                whiteSpace: "nowrap",
+              }}
+            >
+              <Box sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
+                {cat === "Juguetes" && <ToysIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
+                {cat === "Ropa" && <CheckroomIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
+                {cat === "Electrónica" && <DevicesIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
+                {cat === "Hogar" && <HomeIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
+                {cat === "Destacados" && <StarIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
+              </Box>
+              {isMobile && cat.length > 8 ? cat.substring(0, 6) + '...' : cat}
+            </Typography>
+          ))}
+
+          <Chip
+            label={isMobile ? "Conócenos" : "Conócenos"}
+            icon={!isMobile ? <PlaceIcon /> : undefined}
+            component={Link}
+            to="/conocenos"
+            clickable
+            sx={{
+              bgcolor: "primary.main",
+              color: "white",
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              "&:hover": {
+                bgcolor: "primary.dark",
+              },
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              height: { xs: 28, sm: 32 },
+              '.MuiChip-icon': {
+                fontSize: { xs: 16, sm: 18 },
+              }
+            }}
+          />
+        </Box>
       </Box>
     </Box>
-  </Box>
-);
+  );
 }
